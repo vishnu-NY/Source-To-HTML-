@@ -205,6 +205,18 @@ pevent_t * pstate_idle_handler(FILE *fd, int ch)
 	switch(ch)
 	{
 		case '\'' : // begining of ASCII char 
+			pre_ch = ch;
+			if((ch = fgetc(fd)) != EOF)
+			{
+				pevent_data.data[event_data_idx++] = pre_ch;
+				pevent_data.data[event_data_idx++] = ch;
+				state = PSTATE_ASCII_CHAR;
+			}
+			else
+			{
+				set_parser_event(PSTATE_IDLE, PEVENT_EOF);
+				return &pevent_data;
+			}
 			break;
 
 		case '/' :
@@ -223,7 +235,7 @@ pevent_t * pstate_idle_handler(FILE *fd, int ch)
 					printf("Multi line comment Begin : /*\n");
 #endif
 					state = PSTATE_MULTI_LINE_COMMENT;
-					pevent_data.data[event_data_idx++] = pre_ch;
+					pevent_data.data[event_data_idx++] = pre_ch; 
 					pevent_data.data[event_data_idx++] = ch;
 				}
 			}
